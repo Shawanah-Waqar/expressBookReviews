@@ -120,6 +120,72 @@ public_users.get('/async-isbn/:isbn', async function (req, res) {
   }
 });
 
+public_users.get('/author/:author', function (req, res) {
+  const author = req.params.author.toLowerCase();
+  new Promise((resolve, reject) => {
+    const bookKeys = Object.keys(books);
+    const booksByAuthor = bookKeys
+      .map(key => books[key])
+      .filter(book => book.author.toLowerCase() === author);
+    if (booksByAuthor.length > 0) {
+      resolve(booksByAuthor);
+    } else {
+      reject("Books by this author not found.");
+    }
+  })
+  .then((books) => {
+    res.status(200).json(books);
+  })
+  .catch((error) => {
+    res.status(404).json({ message: error });
+  });
+});
+
+// Get book details based on author using async-await with Axios
+public_users.get('/async-author/:author', async function (req, res) {
+  const author = req.params.author.toLowerCase();
+  try {
+    const response = await axios.get(`http://localhost:5000/author/${author}`); // Assuming the current server is running on port 5000
+    const booksByAuthor = response.data;
+    res.status(200).json(booksByAuthor);
+  } catch (error) {
+    res.status(404).json({ message: "Books by this author not found." });
+  }
+});
+
+// Get book details based on title using Promise
+public_users.get('/title/:title', function (req, res) {
+  const title = req.params.title.toLowerCase();
+  new Promise((resolve, reject) => {
+    const bookKeys = Object.keys(books);
+    const booksWithTitle = bookKeys
+      .map(key => books[key])
+      .filter(book => book.title.toLowerCase() === title);
+    if (booksWithTitle.length > 0) {
+      resolve(booksWithTitle);
+    } else {
+      reject("Books with this title not found.");
+    }
+  })
+  .then((books) => {
+    res.status(200).json(books);
+  })
+  .catch((error) => {
+    res.status(404).json({ message: error });
+  });
+});
+
+// Get book details based on title using async-await with Axios
+public_users.get('/async-title/:title', async function (req, res) {
+  const title = req.params.title.toLowerCase();
+  try {
+    const response = await axios.get(`http://localhost:5000/title/${title}`); // Assuming the current server is running on port 5000
+    const booksWithTitle = response.data;
+    res.status(200).json(booksWithTitle);
+  } catch (error) {
+    res.status(404).json({ message: "Books with this title not found." });
+  }
+});
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
   const isbn = req.params.isbn;
